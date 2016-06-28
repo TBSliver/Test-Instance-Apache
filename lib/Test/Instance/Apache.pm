@@ -124,6 +124,8 @@ has apache_httpd => (
   },
 );
 
+has pid => ( is => 'rwp' );
+
 sub _httpd_cmd {
   my $self = shift;
 
@@ -142,6 +144,8 @@ sub run {
 
   # capture will wait until the standard apache fork has finished
   capture( $self->_httpd_cmd );
+
+  $self->_set_pid( $self->get_pid );
 }
 
 sub get_pid {
@@ -180,7 +184,7 @@ sub debug {
 sub DEMOLISH {
   my $self = shift;
 
-  if ( my $pid = $self->get_pid ) {
+  if ( my $pid = $self->pid ) {
     # print "Killing apache with pid " . $pid . "\n";
     kill 'TERM', $pid;
   }
