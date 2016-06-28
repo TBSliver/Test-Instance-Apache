@@ -5,6 +5,7 @@ requires 'namespace::clean';
 requires 'Net::EmptyPort';
 requires 'IO::All';
 requires 'File::Copy::Recursive';
+requires 'Config::General';
 
 on 'test' => sub {
   requires 'Test::More';
