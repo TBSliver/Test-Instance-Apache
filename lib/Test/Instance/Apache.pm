@@ -13,6 +13,8 @@ use Test::Instance::Apache::Modules;
 
 use namespace::clean;
 
+our $VERSION = '0.001';
+
 has _temp_dir => (
   is => 'lazy',
   builder => sub {
