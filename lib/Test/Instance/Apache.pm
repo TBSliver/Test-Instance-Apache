@@ -15,12 +15,55 @@ use namespace::clean;
 
 our $VERSION = '0.001';
 
+=head1 NAME
+
+Test::Instance::Apache - Create Apache instance for Testing
+
+=head1 SYNOPSIS
+
+  use FindBin qw/ $Bin /;
+  use Test::Instance::Apache;
+
+  $instance = Test::Instance::Apache->new(
+    config => {
+      VirtualHost => {
+        '*' => {
+          DocumentRoot => "$Bin/root",
+        },
+      },
+    },
+    modules => [ qw/ mpm_prefork authz_core mime / ],
+  );
+
+  $instance->run;
+
+=head1 DESCRIPTION
+
+Test::Instance::Apache allows you to spin up a complete Apache instance for
+testing. This is useful when developing various plugins for Apache, or if your
+application is tightly integrated to the webserver.
+
+=head2 Attributes
+
+These are the attributes available on Test::Instance::Apache.
+
+=cut
+
 has _temp_dir => (
   is => 'lazy',
   builder => sub {
     return File::Temp->newdir;
   },
 );
+
+=head3 server_root
+
+The root folder for creating the Apache instance. This folder is passed to
+Apache during instantiation as the server root configuration, and normally
+contains all the configuration files for Apache. If not set during object
+creation, a new folder will be created using File::Temp.
+
+=cut
 
 has server_root => (
   is => 'lazy',
@@ -30,12 +73,13 @@ has server_root => (
   },
 );
 
-sub make_server_dir {
-  my ( $self, @dirnames ) = @_;
-  my $dir = File::Spec->catdir( $self->server_root, @dirnames );
-  mkdir $dir;
-  return $dir;
-}
+=head3 conf_dir
+
+The directory for holding the configuration files. Defaults to
+C<$server_root/conf>. If set during object creation, then you will need to
+create the folder manually.
+
+=cut
 
 has conf_dir => (
   is => 'lazy',
@@ -45,6 +89,14 @@ has conf_dir => (
   },
 );
 
+=head3 log_dir
+
+The directory for holding all the log files. Defaults to C<$server_root/logs>.
+If set during object creation, then you will need to create the folder
+manually.
+
+=cut
+
 has log_dir => (
   is => 'lazy',
   builder => sub {
@@ -52,6 +104,14 @@ has log_dir => (
     return $self->make_server_dir( 'logs' );
   },
 );
+
+=head3 conf_file_path
+
+The path to the main configuration file. Defaults to C<$conf_dir/httpd.conf>.
+This is then used by L<Test::Instance::Apache::Config> to create the base
+configuration file.
+
+=cut
 
 has conf_file_path => (
   is => 'lazy',
@@ -61,7 +121,7 @@ has conf_file_path => (
   },
 );
 
-has conf_file => (
+has _config_manager => (
   is => 'lazy',
   builder => sub {
     my $self = shift;
@@ -77,10 +137,26 @@ has conf_file => (
   },
 );
 
+=head3 config
+
+Takes a hashref of values to pass to L<Test::Instance::Apache::Config>. This is
+passed to L<Config::General> internally, so any hashref suitable for that
+module will work here.
+
+=cut
+
 has config => (
   is => 'ro',
   default => sub { return {} },
 );
+
+=head3 modules
+
+Takes an arrayref of modules to load into Apache. These are the same names as
+they appear in C<a2enmod>, so only the modules which are available on your
+local machine can be used.
+
+=cut
 
 has modules => (
   is => 'ro',
@@ -99,6 +175,12 @@ has _module_manager => (
   },
 );
 
+=head3 pid_file_path
+
+Path to the pid file for Apache. Defaults to C<$server_root/httpd.pid>.
+
+=cut
+
 has pid_file_path => (
   is => 'lazy',
   builder => sub {
@@ -107,12 +189,26 @@ has pid_file_path => (
   },
 );
 
+=head3 listen_port
+
+Port for Apache master process to listen on. If not set, will use
+L<Net::EmptyPort::empty_port> to find an unused high-number port.
+
+=cut
+
 has listen_port => (
   is => 'lazy',
   builder => sub {
     return empty_port;
   },
 );
+
+=head3 apache_httpd
+
+Path to the main Apache process. Uses L<File::Which::which> to determine the
+path of the binary from your C<$PATH>.
+
+=cut
 
 has apache_httpd => (
   is => 'lazy',
@@ -126,6 +222,13 @@ has apache_httpd => (
   },
 );
 
+=head3 pid
+
+Pid number for the main Apache process. Set during L</run> and then used during
+L</DEMOLISH> to kill the correct process.
+
+=cut
+
 has pid => ( is => 'rwp' );
 
 sub _httpd_cmd {
@@ -137,10 +240,22 @@ sub _httpd_cmd {
   );
 }
 
+=head2 Methods
+
+These are the various methods inside this module either for internal or basic
+usage.
+
+=head3 run
+
+Sets up all the pre-required folders, writes the config files, loads the
+required modules, and then starts Apache itself.
+
+=cut
+
 sub run {
   my $self = shift;
 
-  $self->conf_file->write_config;
+  $self->_config_manager->write_config;
   $self->_module_manager->load_modules;
   $self->log_dir;
 
@@ -149,6 +264,32 @@ sub run {
 
   $self->_set_pid( $self->get_pid );
 }
+
+=head3 make_server_dir
+
+Used internally to create folders under the server root. Will take an array of
+directory names, which are then passed to File::Spec - so if you do the
+following:
+
+  $instance->make_server_dir( 'a', 'b', 'c' );
+
+Then a path of C<$server_root/a/b/c> will be created.
+
+=cut
+
+sub make_server_dir {
+  my ( $self, @dirnames ) = @_;
+  my $dir = File::Spec->catdir( $self->server_root, @dirnames );
+  mkdir $dir;
+  return $dir;
+}
+
+=head3 get_pid
+
+Returns the contents of the first line of the pid file. Used internally to set
+the pid after startup.
+
+=cut
 
 sub get_pid {
   my $self = shift;
@@ -163,6 +304,15 @@ sub get_pid {
   return $pid;
 }
 
+=head3 get_logs
+
+This will return all the items in the log directory as a hashref of filename
+and content. This is useful either during test development, or if you are
+testing exceptions on your application. Please note that it does not recurse
+subdirectories in the logs folder.
+
+=cut
+
 sub get_logs {
   my $self = shift;
 
@@ -175,6 +325,13 @@ sub get_logs {
   return $logs;
 }
 
+=head3 debug
+
+This is more for use during development of this module - prints out the path of
+all the files and folders stored as attributes in this module.
+
+=cut
+
 sub debug {
   my $self = shift;
   for my $item ( qw/ server_root conf_dir conf_file_path apache_httpd / ) {
@@ -182,6 +339,12 @@ sub debug {
     print $string;
   }
 }
+
+=head3 DEMOLISH
+
+Kills the Apache instance started during run.
+
+=cut
 
 sub DEMOLISH {
   my $self = shift;
@@ -191,5 +354,32 @@ sub DEMOLISH {
     kill 'TERM', $pid;
   }
 }
+
+=head1 AUTHOR
+
+Tom Bloor E<lt>t.bloor@shadowcat.co.ukE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2016 Tom Bloor
+
+=head1 LICENCE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+=over
+
+=item * L<Test::Instance::Apache::Config>
+
+=item * L<Test::Instance::Apache::Modules>
+
+=item * L<Apache::Test>
+
+=back
+
+=cut
 
 1;
