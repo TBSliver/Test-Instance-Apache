@@ -23,15 +23,12 @@ Test::Instance::Apache - Create Apache instance for Testing
 
   use FindBin qw/ $Bin /;
   use Test::Instance::Apache;
-  use Test::Instance::Apache::TiedHash;
 
   my $instance = Test::Instance::Apache->new(
     config => [
-      VirtualHost => {
-        '*' => Test::Instance::Apache::TiedHash->new( [
-          DocumentRoot => "$Bin/root",
-        ] )->hash,
-      },
+      "VirtualHost *" => [
+        DocumentRoot => "$Bin/root",
+      ],
     ],
     modules => [ qw/ mpm_prefork authz_core mime / ],
   );
@@ -131,7 +128,7 @@ has _config_manager => (
       config => [
         PidFile => $self->pid_file_path,
         Listen  => $self->listen_port,
-        Include => $self->_module_manager->include_modules,
+        @{$self->_module_manager->include_modules},
         @{$self->config},
       ]
     );
@@ -140,9 +137,7 @@ has _config_manager => (
 
 =head3 config
 
-Takes an arrayref of values to pass to L<Test::Instance::Apache::Config>. This is
-passed to L<Config::General> internally, so any hashref suitable for that
-module will work here.
+Takes an arrayref of values to pass to L<Test::Instance::Apache::Config>.
 
 =cut
 

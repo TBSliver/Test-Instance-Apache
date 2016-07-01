@@ -5,17 +5,14 @@ use FindBin qw /$Bin /;
 use Test::More;
 use Test::WWW::Mechanize;
 use Test::Instance::Apache;
-use Test::Instance::Apache::TiedHash;
 
 my $instance = Test::Instance::Apache->new(
   config => [
     #Include "$Bin/conf/test.conf",
-    VirtualHost => {
-      '*' => Test::Instance::Apache::TiedHash->new( [
-        DocumentRoot => "$Bin/root",
-        ServerName => "localhost",
-      ] )->hash,
-    },
+    "VirtualHost *" => [
+      DocumentRoot => "$Bin/root",
+      ServerName => "localhost",
+    ],
   ],
   modules => [ qw/ mpm_prefork authz_core mime / ],
 );

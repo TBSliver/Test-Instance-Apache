@@ -94,6 +94,7 @@ has include_modules => (
     my $self = shift;
     my @include;
     foreach ( qw/ load conf / ) {
+      push @include, 'Include';
       push @include, sprintf( '%s/*.%s', $self->_enabled_mods_folder, $_ );
     }
     return \@include;

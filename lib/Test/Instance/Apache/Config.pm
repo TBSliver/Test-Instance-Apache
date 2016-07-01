@@ -1,8 +1,9 @@
 package Test::Instance::Apache::Config;
 
 use Moo;
-use Config::General;
-use Test::Instance::Apache::TiedHash;
+use List::Util qw/ pairs /;
+use IO::All;
+use namespace::clean;
 
 =head1 NAME
 
@@ -17,7 +18,8 @@ Test::Instance::Apache::Config - Create Apache Config File
     filename => "$Bin/conf/httpd.conf",
     config => [
       PidFile => "$Bin/httpd.pid",
-      Include => [ "$Bin/mods_enabled/*.load", "$Bin/mods_enabled/*.conf" ],
+      Include => "$Bin/mods_enabled/*.load",
+      Include => "$Bin/mods_enabled/*.conf",
     ],
   );
 
@@ -41,14 +43,6 @@ The target filename to write the new config file to.
 
 has filename => ( is => 'ro', required => 1 );
 
-has _config_general => (
-  is => 'lazy',
-  builder => sub {
-    my $self = shift;
-    return Config::General->new;
-  },
-);
-
 =head3 config
 
 The arrayref to use to create the configuration file
@@ -60,26 +54,44 @@ has config => (
   default => sub { return [] },
 );
 
-has _tied_config => (
+has _config_string => (
   is => 'lazy',
   builder => sub {
     my $self = shift;
-    return Test::Instance::Apache::TiedHash->new( array => $self->config )->hash;
+    return $self->_gen_string( $self->config );
   },
 );
+
+sub _gen_string {
+  my ( $self, $data, $level ) = @_;
+
+  $level ||= 0;
+
+  return join '', map {
+    my ($key, $value) = @$_;
+    (ref($value) eq 'ARRAY'
+     ? join('',
+       (sprintf "<%s>\n", $key),
+       $self->_gen_string($value, $level + 1),
+       (sprintf "</%s>\n", split( ' ', $key ))
+       )
+     : ('    ' x $level).$key.' '.$value."\n"
+    )
+  } pairs @$data;
+}
 
 =head2 Methods
 
 =head3 write_config
 
-Write the config hashref to the target filename, using L<Config::General>.
+Write the config to the target filename.
 
 =cut
 
 sub write_config {
   my $self = shift;
 
-  $self->_config_general->save_file( $self->filename, $self->_tied_config );
+  io( $self->filename )->print( $self->_config_string );
 }
 
 =head1 AUTHOR
