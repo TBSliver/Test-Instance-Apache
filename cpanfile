@@ -6,6 +6,7 @@ requires 'Net::EmptyPort';
 requires 'IO::All';
 requires 'File::Copy::Recursive';
 requires 'Config::General';
+requires 'Tie::IxHash';
 
 on 'test' => sub {
   requires 'Test::More';
