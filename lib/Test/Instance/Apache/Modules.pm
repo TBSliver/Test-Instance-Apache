@@ -3,11 +3,29 @@ package Test::Instance::Apache::Modules;
 use Moo;
 use IO::All;
 
+=head1 NAME
+
+Test::Instance::Apache::Modules - Apache module management for T::I::A
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head2 Attributes
+
+=head3 modules
+
+=cut
+
 has modules => (
   is => 'ro',
   required => 1,
   isa => sub { die "modules must be an array!\n" unless ref $_[0] eq 'ARRAY' },
 );
+
+=head3 server_root
+
+=cut
 
 has server_root => (
   is => 'ro',
@@ -30,6 +48,10 @@ has _enabled_mods_folder => (
   },
 );
 
+=head3 include_modules
+
+=cut
+
 has include_modules => (
   is => 'lazy',
   builder => sub {
@@ -41,6 +63,12 @@ has include_modules => (
     return \@include;
   },
 );
+
+=head2 Methods
+
+=head3 load_modules
+
+=cut
 
 sub load_modules {
   my $self = shift;
@@ -64,6 +92,10 @@ sub load_modules {
     }
   }
 }
+
+=head3 make_server_dir
+
+=cut
 
 sub make_server_dir {
   my ( $self, @dirnames ) = @_;

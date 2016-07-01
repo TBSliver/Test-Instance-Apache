@@ -23,15 +23,16 @@ Test::Instance::Apache - Create Apache instance for Testing
 
   use FindBin qw/ $Bin /;
   use Test::Instance::Apache;
+  use Test::Instance::Apache::TiedHash;
 
   $instance = Test::Instance::Apache->new(
-    config => {
+    config => [
       VirtualHost => {
-        '*' => {
+        '*' => Test::Instance::Apache::TiedHash->new( [
           DocumentRoot => "$Bin/root",
-        },
+        ] )->hash,
       },
-    },
+    ],
     modules => [ qw/ mpm_prefork authz_core mime / ],
   );
 
@@ -127,19 +128,19 @@ has _config_manager => (
     my $self = shift;
     return Test::Instance::Apache::Config->new(
       filename => $self->conf_file_path,
-      config => {
+      config => [
         PidFile => $self->pid_file_path,
         Listen  => $self->listen_port,
         Include => $self->_module_manager->include_modules,
-        %{$self->config},
-      }
+        @{$self->config},
+      ]
     );
   },
 );
 
 =head3 config
 
-Takes a hashref of values to pass to L<Test::Instance::Apache::Config>. This is
+Takes an arrayref of values to pass to L<Test::Instance::Apache::Config>. This is
 passed to L<Config::General> internally, so any hashref suitable for that
 module will work here.
 
@@ -147,7 +148,7 @@ module will work here.
 
 has config => (
   is => 'ro',
-  default => sub { return {} },
+  default => sub { return [] },
 );
 
 =head3 modules
@@ -375,6 +376,8 @@ it under the same terms as Perl itself.
 =item * L<Test::Instance::Apache::Config>
 
 =item * L<Test::Instance::Apache::Modules>
+
+=item * L<Test::Instance::Apache::TiedHash>
 
 =item * L<Apache::Test>
 

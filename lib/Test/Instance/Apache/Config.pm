@@ -2,6 +2,7 @@ package Test::Instance::Apache::Config;
 
 use Moo;
 use Config::General;
+use Test::Instance::Apache::TiedHash;
 
 =head1 NAME
 
@@ -14,10 +15,10 @@ Test::Instance::Apache::Config - Create Apache Config File
 
   $config_manager = Test::Instance::Apache::Config->new(
     filename => "$Bin/conf/httpd.conf",
-    config => {
+    config => [
       PidFile => "$Bin/httpd.pid",
       Include => [ "$Bin/mods_enabled/*.load", "$Bin/mods_enabled/*.conf" ],
-    },
+    ],
   );
 
   $config_manager->write_config;
@@ -50,22 +51,20 @@ has _config_general => (
 
 =head3 config
 
-The hashref to use to create the configuration file
+The arrayref to use to create the configuration file
 
 =cut
 
 has config => (
   is => 'ro',
-  default => sub { return {} },
+  default => sub { return [] },
 );
 
-has _base_config => (
+has _tied_config => (
   is => 'lazy',
   builder => sub {
     my $self = shift;
-    return {
-      %{$self->config},
-    }
+    return Test::Instance::Apache::TiedHash->new( array => $self->config )->hash;
   },
 );
 
@@ -80,7 +79,7 @@ Write the config hashref to the target filename, using L<Config::General>.
 sub write_config {
   my $self = shift;
 
-  $self->_config_general->save_file( $self->filename, $self->_base_config );
+  $self->_config_general->save_file( $self->filename, $self->_tied_config );
 }
 
 =head1 AUTHOR
