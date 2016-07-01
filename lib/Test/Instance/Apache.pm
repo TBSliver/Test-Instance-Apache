@@ -347,7 +347,14 @@ sub DEMOLISH {
 
   if ( my $pid = $self->pid ) {
     # print "Killing apache with pid " . $pid . "\n";
-    kill 'TERM', $pid;
+    for my $signal ( qw/ TERM TERM INT KILL / ) {
+      kill $signal, $pid;
+      for ( 1..10 ) {
+        last unless( kill 0, $pid );
+        sleep 1;
+      }
+      last unless( kill 0, $pid );
+    }
   }
 }
 
