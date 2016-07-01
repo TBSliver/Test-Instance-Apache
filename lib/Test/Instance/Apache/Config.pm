@@ -13,7 +13,7 @@ Test::Instance::Apache::Config - Create Apache Config File
   use FindBin qw/ $Bin /;
   use Test::Instance::Apache::Config;
 
-  $config_manager = Test::Instance::Apache::Config->new(
+  my $config_manager = Test::Instance::Apache::Config->new(
     filename => "$Bin/conf/httpd.conf",
     config => [
       PidFile => "$Bin/httpd.pid",

@@ -25,7 +25,7 @@ Test::Instance::Apache - Create Apache instance for Testing
   use Test::Instance::Apache;
   use Test::Instance::Apache::TiedHash;
 
-  $instance = Test::Instance::Apache->new(
+  my $instance = Test::Instance::Apache->new(
     config => [
       VirtualHost => {
         '*' => Test::Instance::Apache::TiedHash->new( [

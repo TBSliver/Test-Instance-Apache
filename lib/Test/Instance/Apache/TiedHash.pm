@@ -64,7 +64,7 @@ around BUILDARGS => sub {
 
   return { array => $args[0] }
     if @args == 1;
-       
+
   return $class->$orig( @args );
 };
 
