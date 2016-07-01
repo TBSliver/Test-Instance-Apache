@@ -37,7 +37,6 @@
       },
       "runtime" : {
          "requires" : {
-            "Config::General" : "0",
             "File::Copy::Recursive" : "0",
             "File::Which" : "0",
             "IO::All" : "0",

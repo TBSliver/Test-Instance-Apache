@@ -6,15 +6,12 @@ Test::Instance::Apache - Create Apache instance for Testing
 
     use FindBin qw/ $Bin /;
     use Test::Instance::Apache;
-    use Test::Instance::Apache::TiedHash;
 
     my $instance = Test::Instance::Apache->new(
       config => [
-        VirtualHost => {
-          '*' => Test::Instance::Apache::TiedHash->new( [
-            DocumentRoot => "$Bin/root",
-          ] )->hash,
-        },
+        "VirtualHost *" => [
+          DocumentRoot => "$Bin/root",
+        ],
       ],
       modules => [ qw/ mpm_prefork authz_core mime / ],
     );
@@ -58,9 +55,7 @@ configuration file.
 
 ### config
 
-Takes an arrayref of values to pass to [Test::Instance::Apache::Config](https://metacpan.org/pod/Test::Instance::Apache::Config). This is
-passed to [Config::General](https://metacpan.org/pod/Config::General) internally, so any hashref suitable for that
-module will work here.
+Takes an arrayref of values to pass to [Test::Instance::Apache::Config](https://metacpan.org/pod/Test::Instance::Apache::Config).
 
 ### modules
 
