@@ -258,7 +258,11 @@ sub run {
   # capture will wait until the standard apache fork has finished
   capture( $self->_httpd_cmd );
 
-  $self->_set_pid( $self->get_pid );
+  for (1 .. 10) {
+    $self->_set_pid( $self->get_pid );
+    last if defined $self->pid;
+    sleep 1;
+  }
 }
 
 =head3 make_server_dir
@@ -294,9 +298,9 @@ sub get_pid {
   if ( -f $self->pid_file_path ) {
     open( my $fh, '<', $self->pid_file_path );
     $pid = <$fh>; # read first line
+    chomp $pid;
     close $fh;
   }
-
   return $pid;
 }
 
@@ -348,14 +352,25 @@ sub DEMOLISH {
   if ( my $pid = $self->pid ) {
     # print "Killing apache with pid " . $pid . "\n";
     for my $signal ( qw/ TERM TERM INT KILL / ) {
-      kill $signal, $pid;
+      $self->_kill_pid($signal);
       for ( 1..10 ) {
-        last unless( kill 0, $pid );
+        last unless $self->_kill_pid( 0 );
         sleep 1;
       }
-      last unless( kill 0, $pid );
+      last unless $self->_kill_pid( 0 );
     }
   }
+}
+
+sub _kill_pid {
+  my ( $self, $signal ) = @_;
+
+  #print "Signal [" . $signal . "]\n";
+  #print "Pid [" . $self->pid . "]\n";
+  return undef unless $self->pid;
+  my $ret = kill $signal, $self->pid;
+  #print "Kill Return code: [" . $ret . "]\n";
+  return $ret;
 }
 
 =head1 AUTHOR
