@@ -140,5 +140,4 @@ it under the same terms as Perl itself.
 
 - [Test::Instance::Apache::Config](https://metacpan.org/pod/Test::Instance::Apache::Config)
 - [Test::Instance::Apache::Modules](https://metacpan.org/pod/Test::Instance::Apache::Modules)
-- [Test::Instance::Apache::TiedHash](https://metacpan.org/pod/Test::Instance::Apache::TiedHash)
 - [Apache::Test](https://metacpan.org/pod/Apache::Test)

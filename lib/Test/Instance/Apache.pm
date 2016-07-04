@@ -402,8 +402,6 @@ it under the same terms as Perl itself.
 
 =item * L<Test::Instance::Apache::Modules>
 
-=item * L<Test::Instance::Apache::TiedHash>
-
 =item * L<Apache::Test>
 
 =back
