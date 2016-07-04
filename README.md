@@ -70,11 +70,11 @@ Path to the pid file for Apache. Defaults to `$server_root/httpd.pid`.
 ### listen\_port
 
 Port for Apache master process to listen on. If not set, will use
-[Net::EmptyPort::empty\_port](https://metacpan.org/pod/Net::EmptyPort::empty_port) to find an unused high-number port.
+["empty\_port" in Net::EmptyPort](https://metacpan.org/pod/Net::EmptyPort#empty_port) to find an unused high-number port.
 
 ### apache\_httpd
 
-Path to the main Apache process. Uses [File::Which::which](https://metacpan.org/pod/File::Which::which) to determine the
+Path to the main Apache process. Uses ["which" in File::Which](https://metacpan.org/pod/File::Which#which) to determine the
 path of the binary from your `$PATH`.
 
 ### pid

@@ -188,7 +188,7 @@ has pid_file_path => (
 =head3 listen_port
 
 Port for Apache master process to listen on. If not set, will use
-L<Net::EmptyPort::empty_port> to find an unused high-number port.
+L<Net::EmptyPort/empty_port> to find an unused high-number port.
 
 =cut
 
@@ -201,7 +201,7 @@ has listen_port => (
 
 =head3 apache_httpd
 
-Path to the main Apache process. Uses L<File::Which::which> to determine the
+Path to the main Apache process. Uses L<File::Which/which> to determine the
 path of the binary from your C<$PATH>.
 
 =cut
