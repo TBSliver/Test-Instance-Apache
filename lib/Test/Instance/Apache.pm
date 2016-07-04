@@ -209,11 +209,19 @@ path of the binary from your C<$PATH>.
 has apache_httpd => (
   is => 'lazy',
   builder => sub {
-    my $httpd;
-    for my $name (qw/ httpd apache apache2 /) {
-      $httpd = which( $name );
-      return $httpd if defined $httpd;
-    }
+    my ($httpd) = do {
+      local $ENV{PATH} = join( ':',
+        map {
+          my $copy = $_;
+          ( $copy =~ s!/bin$!/sbin!
+              ? ( $copy,$_ )
+              : $_
+          )
+        } split ':', $ENV{PATH}
+      );
+      grep defined, map scalar( which $_ ), qw/ httpd apache apache2 /;
+    };
+    return $httpd if defined $httpd;
     die "Apache server program not found - please check your path\n";
   },
 );

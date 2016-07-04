@@ -8,7 +8,7 @@ use Test::Instance::Apache;
 my $apache_instance = Test::Instance::Apache->new( modules => [] );
 
 {
-  local %ENV;
+  local $ENV{PATH} = "";
   my $no_path_instance = Test::Instance::Apache->new( modules => [] );
   dies_ok { $no_path_instance->apache_httpd } 'Dies when no Apache found';
 }
