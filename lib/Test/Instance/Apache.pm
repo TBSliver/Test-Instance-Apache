@@ -385,7 +385,7 @@ sub _kill_pid {
 
 Tom Bloor E<lt>t.bloor@shadowcat.co.ukE<gt>
 
-Initial development sponsored by L<Runbox|http://www.runbox.com/>
+Initial development sponsored by L<Runbox Solutions AS|http://www.runbox.com/>
 
 =head1 COPYRIGHT
 

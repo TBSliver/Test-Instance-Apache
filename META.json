@@ -26,7 +26,10 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.034"
+            "Devel::AssertOS" : "0",
+            "Devel::CheckOS" : "1.63",
+            "ExtUtils::MakeMaker" : "0",
+            "File::Which" : "0"
          }
       },
       "develop" : {
