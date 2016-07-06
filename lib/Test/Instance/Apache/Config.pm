@@ -73,7 +73,7 @@ sub _gen_string {
      ? join('',
        (sprintf "<%s>\n", $key),
        $self->_gen_string($value, $level + 1),
-       (sprintf "</%s>\n", split( ' ', $key ))
+       (sprintf "</%s>\n", (split( ' ', $key ))[0])
        )
      : ('    ' x $level).$key.' '.$value."\n"
     )
