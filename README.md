@@ -127,7 +127,7 @@ Kills the Apache instance started during run.
 
 Tom Bloor &lt;t.bloor@shadowcat.co.uk>
 
-Initial development sponsored by [Runbox](http://www.runbox.com/)
+Initial development sponsored by [Runbox Solutions AS](http://www.runbox.com/)
 
 # COPYRIGHT
 
