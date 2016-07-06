@@ -44,6 +44,7 @@
             "File::Which" : "0",
             "IO::All" : "0",
             "IPC::System::Simple" : "0",
+            "List::Util" : "1.29",
             "Moo" : "0",
             "Net::EmptyPort" : "0",
             "namespace::clean" : "0"
