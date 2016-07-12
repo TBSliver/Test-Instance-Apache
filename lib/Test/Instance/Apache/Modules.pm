@@ -29,9 +29,10 @@ to only do what is necessary for T::I::A.
 
 The module creates a C<mods-available> and C<mods-enabled> folder inside the
 L</server_root> directory, and then copies the contents of
-C</etc/apache2/mods-available> into the new C<mods-available> folder. Then,
-symlinks are created across to the C<mods-enabled> folder, ready for Apache to
-include from the L</include_modules> list.
+C</etc/apache2/mods-available> (or C</etc/httpd/modules>) into the
+new C<mods-available> folder. Then, symlinks are created across to the
+C<mods-enabled> folder, ready for Apache to include from the
+L</include_modules> list.
 
 =head2 Attributes
 
