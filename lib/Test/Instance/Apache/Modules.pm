@@ -81,6 +81,17 @@ has _enabled_mods_folder => (
   },
 );
 
+has _original_mods_folder => (
+  is => 'lazy',
+  builder => sub {
+    my $self = shift;
+    for my $path ( qw! /etc/apache2/mods-available /etc/httpd/modules ! ) {
+      return $path if -d $path;
+    }
+    die "Cannot find directory for original modules";
+  },
+);
+
 =head3 include_modules
 
 This creates the include paths for the C<conf> and C<load> files as required by
@@ -117,7 +128,7 @@ C<mods-enabled> folder.
 sub load_modules {
   my $self = shift;
 
-  io->dir( '/etc/apache2/mods-available' )->copy( $self->_available_mods_folder );
+  io->dir( $self->_original_mods_folder )->copy( $self->_available_mods_folder );
 
   for my $module ( @{ $self->modules } ) {
     for my $suffix ( qw/ conf load / ) {
